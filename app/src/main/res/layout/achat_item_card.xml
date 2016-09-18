@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/cont_item_root"
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="5dp"
+    android:clickable="true"
+
+    >
+
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_margin="2dp"
+        card_view:cardCornerRadius="4dp"
+        card_view:cardElevation="2dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:id="@+id/imageView"
+                android:background="@drawable/back_rounded"
+                android:src="@drawable/pexels"
+                android:scaleType="fitXY"
+                android:elevation="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:contentDescription="@string/paysage"
+                android:transitionName="@string/transition_image"
+                />
+
+
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/imageView"
+                android:id="@+id/layout_auteur">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auteur"
+                    android:id="@+id/textView"
+                    android:textSize="18sp"
+                    android:layout_weight="0"
+                    />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lbl_nom"
+                    android:layout_weight="1"
+                    android:transitionName="@string/transition_auteur"/>
+                </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/layout_auteur"
+                android:id="@+id/layout_semaine">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/date"
+                    android:id="@+id/lbl_date_achat"
+                    android:textSize="18sp"
+                    android:layout_weight="0"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/date_achat"
+                    android:layout_weight="1"
+                    android:transitionName="@string/transition_semaine"/>
+
+
+
+                </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="15dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prix"
+                    android:textSize="30sp"
+                    android:id="@+id/lbl_prix_achat"
+                    android:layout_weight="0"
+                    android:ellipsize="end"
+                    />
+
+                <TextView
+                    android:id="@+id/prix_achat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorAccent"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:textSize="30sp"
+                    android:transitionName="@string/transition_prix"/>
+
+                <TextView
+                    android:id="@+id/lbl_euro_achat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:ellipsize="end"
+                    android:text="@string/euro_sign"
+                    android:textSize="30sp" />
+
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+    </android.support.v7.widget.CardView>
+</RelativeLayout>
+

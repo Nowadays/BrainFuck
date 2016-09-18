@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">BrainFuck</string>
+    <string name="auteur">Auteur:</string>
+    <string name="semaine">Semaine:</string>
+    <string name="prix">Prix:</string>
+    <string name="paysage">Paysage</string>
+    <string name="euro_sign">€</string>
+    <string name="transition_image">image</string>
+    <string name="transition_auteur">auteur</string>
+    <string name="transition_semaine">semaine</string>
+    <string name="transition_prix">prix</string>
+    <string name="imagefromactivity">imageFromActivity</string>
+    <string name="prix_article">Prix :</string>
+    <string name="quantite_article">Quantité :</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="libelle_detail">Libelle :</string>
+    <string name="quantite_detail">Quantité :</string>
+    <string name="date">Date :</string>
+
+</resources>

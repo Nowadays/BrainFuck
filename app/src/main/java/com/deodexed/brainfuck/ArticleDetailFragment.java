@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -20,8 +21,8 @@ import android.widget.TextView;
 public class ArticleDetailFragment extends Fragment {
     private static final String ARTICLE = "ARTICLE";
     private Article arguments;
-    private  int id_article, id_achat;
-    private  String nom_user;
+    private int id_article, id_achat;
+    private String nom_user;
 
     private FragmentEditItemCallBack callback;
 
@@ -34,25 +35,25 @@ public class ArticleDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ArticleDetailFragment newInstance(Article article){
+    public static ArticleDetailFragment newInstance(Article article) {
 
         ArticleDetailFragment articleDetailFragment = new ArticleDetailFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARTICLE,article);
+        args.putParcelable(ARTICLE, article);
         articleDetailFragment.setArguments(args);
         return articleDetailFragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(getArguments() != null){
-         this.arguments = getArguments().getParcelable(ARTICLE);
+        if (getArguments() != null) {
+            this.arguments = getArguments().getParcelable(ARTICLE);
         }
 
     }
 
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
     }
@@ -62,13 +63,13 @@ public class ArticleDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-         framgmentView = inflater.inflate(R.layout.fragment_article_detail, container, false);
+        framgmentView = inflater.inflate(R.layout.fragment_article_detail, container, false);
 
 
-        libelle_detail = (EditText)framgmentView.findViewById(R.id.et_libelle_detail);
-        quantite_detail = (EditText)framgmentView.findViewById(R.id.et_quantite_detail);
-        prix_detail = (EditText)framgmentView.findViewById(R.id.et_prix_detail);
-        validate = (Button)framgmentView.findViewById(R.id.btn_validate);
+        libelle_detail = (EditText) framgmentView.findViewById(R.id.et_libelle_detail);
+        quantite_detail = (EditText) framgmentView.findViewById(R.id.et_quantite_detail);
+        prix_detail = (EditText) framgmentView.findViewById(R.id.et_prix_detail);
+        validate = (Button) framgmentView.findViewById(R.id.btn_validate);
         validate.setOnClickListener(onClickListener);
 
         return framgmentView;
@@ -84,9 +85,9 @@ public class ArticleDetailFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentEditItemCallBack){
-            callback = (FragmentEditItemCallBack)context;
-        }else{
+        if (context instanceof FragmentEditItemCallBack) {
+            callback = (FragmentEditItemCallBack) context;
+        } else {
             throw new RuntimeException(context.toString() + "must implement callBack");
         }
     }
@@ -98,7 +99,7 @@ public class ArticleDetailFragment extends Fragment {
     }
 
 
-    public interface FragmentEditItemCallBack{
+    public interface FragmentEditItemCallBack {
         void onEditButtonClick(Article article);
     }
 
@@ -106,17 +107,22 @@ public class ArticleDetailFragment extends Fragment {
         @Override
         public void onClick(View view) {
             Log.i("TEST", "Prix : " + libelle_detail.getText().toString());
-            prix_detail = (EditText)framgmentView.findViewById(R.id.et_prix_detail);
-            libelle_detail = (EditText)framgmentView.findViewById(R.id.et_libelle_detail);
-            quantite_detail = (EditText)framgmentView.findViewById(R.id.et_quantite_detail);
-            callback.onEditButtonClick(new Article(id_article, id_achat, nom_user,libelle_detail.getText().toString(), Integer.parseInt(prix_detail.getText().toString()),Integer.parseInt(quantite_detail.getText().toString()) ));
+            prix_detail = (EditText) framgmentView.findViewById(R.id.et_prix_detail);
+            libelle_detail = (EditText) framgmentView.findViewById(R.id.et_libelle_detail);
+            quantite_detail = (EditText) framgmentView.findViewById(R.id.et_quantite_detail);
+            if (isEditTextEmpty()) {
+                Toast.makeText(getActivity(), "Champ de texte non rempli", Toast.LENGTH_LONG).show();
+            } else {
+                callback.onEditButtonClick(new Article(id_article, id_achat, nom_user, libelle_detail.getText().toString(), Integer.parseInt(prix_detail.getText().toString()), Integer.parseInt(quantite_detail.getText().toString())));
+            }
+
         }
     };
 
     @Override
     public void onResume() {
         super.onResume();
-        if (arguments != null){
+        if (arguments != null) {
             libelle_detail.setText(arguments.getLibelle_article());
             quantite_detail.setText(Integer.toString(arguments.getQuantite_article()));
             prix_detail.setText(Integer.toString(arguments.getPrix_article()));
@@ -124,15 +130,24 @@ public class ArticleDetailFragment extends Fragment {
         }
     }
 
-    public void setEditText(String libelle, String quantite, String prix){
+    public void setEditText(String libelle, String quantite, String prix) {
         libelle_detail.setText(libelle);
         quantite_detail.setText(quantite);
         prix_detail.setText(prix);
     }
 
-    public  void setId(int id, int id_a,String nom_user){
+    public void setId(int id, int id_a, String nom_user) {
         id_article = id;
         id_achat = id_a;
         this.nom_user = nom_user;
+    }
+
+    protected boolean isEditTextEmpty() {
+        boolean answer = false;
+        if (libelle_detail.toString().isEmpty() || quantite_detail.toString().isEmpty() || prix_detail.toString().isEmpty()) {
+            answer = true;
+        }
+
+        return answer;
     }
 }

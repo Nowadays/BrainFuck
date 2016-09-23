@@ -27,8 +27,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class AchatDetailActivity extends AppCompatActivity implements ArticleFragment.FragmentItemClickCallBack, ArticleDetailFragment.FragmentEditItemCallBack, RemoteDatabaseListener{
+public class AchatDetailActivity extends AppCompatActivity implements ArticleFragment.FragmentItemClickCallBack, ArticleDetailFragment.FragmentEditItemCallBack, RemoteDatabaseListener, PostResultListener {
 
+    @Override
+    public void onPostRequestFinished(String jsondata) {
+
+    }
 
     public final String FRAG_ARTICLE_RECYCLERVIEW = "FRAG_ARTICLE_RECYCLERVIEW";
     public final String FRAG_ARTICLE_DETAIL = "FRAG_ARTICLE_DETAIL";
@@ -37,20 +41,18 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
 
     private ArrayList<Article> listData;
     private FragmentManager manager;
-    private int lastAdapterPosition;
+    private int lastAdapterPosition = 0;
 
     private int id_achat;
     private String nom_user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_achat_detail);
         listData = new ArrayList<>();
 
-        pd = new ProgressDialog(this);
-        pd.setTitle("Downloading...");
-        pd.setMessage("Téléchargement des articles");
-        pd.show();
+
 
 
 
@@ -61,39 +63,22 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
         transaction.commit();*/
 
 
-
         Bundle extras = getIntent().getBundleExtra(MainActivity.BUNDLE_EXTRAS);
+        if (!extras.isEmpty()){
+            pd = new ProgressDialog(this);
+            pd.setTitle("Downloading...");
+            pd.setMessage("Téléchargement des articles");
+            pd.show();
+            this.id_achat = extras.getInt(MainActivity.EXTRA_ID_ACHAT);
+            this.nom_user = extras.getString(MainActivity.EXTRA_NOM_USER);
+            HttpGetTask hgt = new HttpGetTask(this, "BrainFuckApp/getAllArticlesFromAchat/" + Integer.toString(this.id_achat), ScriptValues.GET_ALL_ARTICLE_FROM_ACHAT, pd);
+            if (isNetworkAvailable()) {
 
-        this.id_achat = extras.getInt(MainActivity.EXTRA_ID_ACHAT);
-        this.nom_user = extras.getString(MainActivity.EXTRA_NOM_USER);
-        HttpGetTask hgt = new HttpGetTask(this,"BrainFuckApp/getAllArticlesFromAchat/" + Integer.toString(this.id_achat), ScriptValues.GET_ALL_ARTICLE_FROM_ACHAT, pd);
-        if (isNetworkAvailable()){
-
-            hgt.execute();
+                hgt.execute();
+            }
         }
 
 
-
-
-       /* ((TextView)findViewById(R.id.lbl_detail_auteur)).setText(extras.getString(EXTRA_AUTEUR));
-        ((TextView)findViewById(R.id.lbl_semaine)).setText(extras.getString(EXTRA_SEMAINE));
-        ((TextView)findViewById(R.id.lbl_prix)).setText(Integer.toString(extras.getInt(EXTRA_PRIX)));
-
-        //((ImageView)findViewById(R.id.im_detail_image)).setImageDrawable(
-         //       ContextCompat.getDrawable(this, extras.getInt(EXTRA_IMAGE_RES_ID)));
-
-        switch (extras.getInt(EXTRA_IMAGE_RES_ID)){
-            case 0 : ((ImageView)findViewById(R.id.im_detail_image)).setImageDrawable(getDrawable(R.drawable.pexels2));
-                break;
-            case 1 : ((ImageView)findViewById(R.id.im_detail_image)).setImageDrawable(getDrawable(R.drawable.renders));
-                break;
-            case 2: ((ImageView)findViewById(R.id.im_detail_image)).setImageDrawable(getDrawable(R.drawable.stock));
-                break;
-            case 3: ((ImageView)findViewById(R.id.im_detail_image)).setImageDrawable(getDrawable(R.drawable.pexels));
-                break;
-
-            default: break;
-        }*/
 
 
       /*  final View myView = findViewById(R.id.im_detail_image);
@@ -122,36 +107,39 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
         });*/
 
 
-
-
     }
 
     @Override
     public void onEditButtonClick(Article article) {
-        Toast.makeText(this,"Edit button clicked",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Edit button clicked", Toast.LENGTH_SHORT).show();
         int id_article = article.getId_article();
         int id_achat = article.getId_achat();
 
 
         ContentValues cv = new ContentValues();
-        cv.put("id_article",id_article);
-        cv.put("id_achat",id_achat);
+        cv.put("id_article", id_article);
+        cv.put("id_achat", id_achat);
         cv.put("libelle", article.getLibelle_article());
         cv.put("quantite", article.getQuantite_article());
-        cv.put("prix",article.getPrix_article());
+        cv.put("prix", article.getPrix_article());
 
-        HttpPostTask hp = new HttpPostTask(this,"BrainFuckApp/setArticle",cv);
+        HttpPostTask hp = new HttpPostTask(this, "BrainFuckApp/setArticle", cv);
         hp.execute();
         ArticleFragment af = (ArticleFragment) getSupportFragmentManager().findFragmentById(R.id.down_fragment);
-        af.setArticle(article,this.lastAdapterPosition);
+        if (af.isDataListEmpty()) {
+            af.addArticle(article);
+        } else {
+            af.setArticle(article, this.lastAdapterPosition);
+        }
+
 
     }
 
     @Override
     public void onListItemClicked(int position) {
         ArticleDetailFragment det = (ArticleDetailFragment) getSupportFragmentManager().findFragmentById(R.id.up_fragment);
-        det.setEditText(listData.get(position).getLibelle_article(),Integer.toString(listData.get(position).getQuantite_article()),Integer.toString(listData.get(position).getPrix_article()));
-        det.setId(listData.get(position).getId_article(),listData.get(position).getId_achat(),listData.get(position).getNom_user());
+        det.setEditText(listData.get(position).getLibelle_article(), Integer.toString(listData.get(position).getQuantite_article()), Integer.toString(listData.get(position).getPrix_article()));
+        det.setId(listData.get(position).getId_article(), listData.get(position).getId_achat(), listData.get(position).getNom_user());
 
         /*Fragment detailFrag = ArticleDetailFragment.newInstance(listData.get(position));
         manager = getSupportFragmentManager();
@@ -159,14 +147,15 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
 
         transaction.replace(R.id.up_fragment,detailFrag,FRAG_ARTICLE_DETAIL);
         transaction.commit();*/
-        this.lastAdapterPosition =  position;
+        this.lastAdapterPosition = position;
     }
-    public ArrayList<Article> getListData(){
+
+    public ArrayList<Article> getListData() {
         return this.listData;
     }
 
 
-    public  boolean isNetworkAvailable() {
+    public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
@@ -195,11 +184,11 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
                             JSONObject row = array.getJSONObject(i);
                             //nom_user = row.getString("nom") + " " + row.getString("prenom");
                             id_articles = row.getInt("id");
-                           // id_achat = row.getInt("id_achat");
+                            // id_achat = row.getInt("id_achat");
                             libelle_article = row.getString("libelle");
                             prix = row.getInt("prix");
                             quantite = row.getInt("quantite");
-                           // date = row.getString("date");
+                            // date = row.getString("date");
 
                             this.listData.add(new Article(id_articles, this.id_achat, this.nom_user, libelle_article, prix, quantite));
 
@@ -208,14 +197,19 @@ public class AchatDetailActivity extends AppCompatActivity implements ArticleFra
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    FragmentTransaction transaction;
-                    manager = getSupportFragmentManager();
-                    Fragment listFrag = ArticleFragment.newInstance(this.listData);
-                    transaction = manager.beginTransaction();
+                    if (!listData.isEmpty()) {
+                        FragmentTransaction transaction;
+                        manager = getSupportFragmentManager();
+                        Fragment listFrag = ArticleFragment.newInstance(this.listData);
+                        transaction = manager.beginTransaction();
 
 
-                    transaction.replace(R.id.down_fragment,listFrag,FRAG_ARTICLE_RECYCLERVIEW);
-                    transaction.commit();
+                        transaction.replace(R.id.down_fragment, listFrag, FRAG_ARTICLE_RECYCLERVIEW);
+                        transaction.commit();
+                    } else {
+
+                    }
+
                 }
                 break;
             }

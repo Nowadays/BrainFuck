@@ -110,4 +110,13 @@ public class ArticleFragment extends Fragment {
 
     }
 
+    public void addArticle(Article article){
+        this.listData.add(article);
+        adapter.notifyDataSetChanged();
+    }
+
+    public boolean isDataListEmpty(){
+        return this.listData.isEmpty();
+    }
+
 }

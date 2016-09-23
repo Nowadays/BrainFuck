@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_add_new_achat"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="com.deodexed.brainfuck.AddNewAchatActivity">
+
+
+    <RelativeLayout
+        android:id="@+id/root_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:focusableInTouchMode="true"
+        >
+
+        <LinearLayout
+            android:id="@+id/second_linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp">
+
+            <TextView
+                android:id="@+id/lbl_libelle_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="0"
+                android:text="@string/libelle_article_add"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@android:color/white" />
+
+            <EditText
+                android:id="@+id/et_libelle_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAccent"
+
+                android:ems="10"
+                android:hint="@string/article_add"
+                android:inputType="textPersonName"
+                android:selectAllOnFocus="false"
+                android:textColor="@android:color/holo_red_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/first_linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/second_linearLayout"
+            android:layout_margin="16dp">
+
+            <TextView
+                android:id="@+id/lbl_quantite_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quantite_libelle_add"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@android:color/white" />
+
+            <Spinner
+                android:id="@+id/spinner_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+
+                android:backgroundTint="@color/colorAccent" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/third_linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/first_linearLayout"
+            android:layout_margin="16dp">
+
+            <TextView
+                android:id="@+id/lbl_prix_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prix_libelle_add"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@android:color/white" />
+
+            <EditText
+                android:id="@+id/et_prix_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAccent"
+                android:ems="10"
+                android:hint="@string/prix_des_articles_add"
+                android:inputType="numberSigned"
+                android:textColor="@android:color/holo_red_light" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/fourth_linearLayout"
+            android:layout_below="@id/third_linearLayout"
+            android:layout_margin="16dp">
+
+            <TextView
+                android:text="Commentaire : "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:id="@+id/lbl_commentaire_add"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textColor="@android:color/white"
+                android:layout_weight="0"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:ems="10"
+                android:id="@+id/et_commentaire"
+                android:layout_weight="1"
+
+                android:hint="Tapez votre commentaire"
+                android:textColor="@android:color/holo_red_light"
+                android:backgroundTint="@color/colorAccent"
+                />
+        </LinearLayout>
+
+        <Button
+            android:text="Valider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_validate_add"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_below="@id/fourth_linearLayout"
+            android:layout_alignParentStart="true"
+            android:onClick="onValidateBtnClick"
+             />
+
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

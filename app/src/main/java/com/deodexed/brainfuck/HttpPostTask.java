@@ -19,7 +19,7 @@ import java.net.URLEncoder;
     class HttpPostTask extends AsyncTask<String, Integer, String>
     {
         /** écouteur sur la terminaison de la requête HTTP */
-        private RemoteDatabaseListener listener;
+        private PostResultListener listener;
         /** script PHP à ouvrir */
         private String scriptToExecute;
         /** paramètres à fournir au script PHP */
@@ -32,7 +32,7 @@ import java.net.URLEncoder;
         }
 
 
-        public HttpPostTask(RemoteDatabaseListener listener, String scriptToExecute, ContentValues params)
+        public HttpPostTask(PostResultListener listener, String scriptToExecute, ContentValues params)
         {
             this.listener = listener;
             this.scriptToExecute = scriptToExecute;
@@ -62,16 +62,20 @@ import java.net.URLEncoder;
                 DataOutputStream contenu = new DataOutputStream(connexion.getOutputStream());
                 contenu.writeBytes(sb.toString());
                // contenu.close();
-
+                String jsondata;
                 // récupérer la réponse du serveur
-                String serverResponseMessage = connexion.getResponseMessage();
-                InputStream reponse = connexion.getInputStream();
-                // récupérer les données et en faire une chaîne
-               BufferedReader reader = new BufferedReader(new InputStreamReader(reponse, "utf-8"));
-                String jsondata = reader.readLine();
-                Log.i("TEST", jsondata);
+
+                    InputStream reponse = connexion.getInputStream();
+                    // récupérer les données et en faire une chaîne
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(reponse, "utf-8"));
+                    jsondata = reader.readLine();
+                    Log.i("TEST", jsondata);
+
+
+
+
                 contenu.close();
-                return null;
+                return jsondata;
 
             } catch (Exception e) {
                 Log.e("test", e.toString());
@@ -89,6 +93,9 @@ import java.net.URLEncoder;
         @Override
         protected void onPostExecute(String jsondata)
         {
+            if(jsondata != null){
+                listener.onPostRequestFinished(jsondata);
+            }
 
         }
 

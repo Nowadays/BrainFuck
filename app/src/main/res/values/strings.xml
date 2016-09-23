@@ -18,5 +18,11 @@
     <string name="libelle_detail">Libelle :</string>
     <string name="quantite_detail">Quantité :</string>
     <string name="date">Date :</string>
+    <string name="pas_dachats_disponible">Pas d\'achats disponible</string>
+    <string name="article_add">Article</string>
+    <string name="libelle_article_add">Libellé article :</string>
+    <string name="prix_des_articles_add">Prix des articles</string>
+    <string name="prix_libelle_add">Prix :</string>
+    <string name="quantite_libelle_add">Quantité :</string>
 
 </resources>

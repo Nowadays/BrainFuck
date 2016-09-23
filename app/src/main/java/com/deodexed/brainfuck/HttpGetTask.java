@@ -70,16 +70,6 @@ import java.util.Date;
             URL url = null;
             try {
                 // ouvrir la connexion HTTP
-                /*switch (values.length){
-                    case 0 : throw new Exception("no parameters");
-                    case 1 :  url = new URL(BASE_URL+ "BrainFuckApp/"+ values[0]);
-                        break;
-                    case 2 :  url = new URL(BASE_URL+ "BrainFuckApp/"+ values[0]+"/"+values[1]);
-                        break;
-                    case 3 :  url = new URL(BASE_URL+ "BrainFuckApp/"+ values[0]+"/"+values[1]+"/"+values[2]);
-                        break;
-                }*/
-
                 url = new URL(BASE_URL + scriptPath);
                 connexion = (HttpURLConnection) url.openConnection();
 
@@ -103,13 +93,13 @@ import java.util.Date;
                     jsondata += (fromReader + "\n");
                 }
 
-                pd.dismiss();
+                pd.dismiss(); //ProgressDialog started from the main thread
 
                 return jsondata;
 
             } catch (Exception e) {
 
-                    Log.e("ERREUR", e.toString());
+                    Log.e("ERROR", e.toString());
 
                 return null;
 

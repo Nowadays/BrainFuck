@@ -1,6 +1,5 @@
 package com.deodexed.brainfuck;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,32 +7,26 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
+import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v7.app.ActionBar;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.widget.ProgressBar;
+import android.view.animation.TranslateAnimation;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -41,29 +34,31 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+public class MainActivity extends AppCompatActivity implements AchatAdapter.ItemClickCallback, RemoteDatabaseListener, PostResultListener {
 
-public class MainActivity extends AppCompatActivity implements AchatAdapter.ItemClickCallback, RemoteDatabaseListener {
 
     public static final String EXTRA_NOM_USER = "EXTRA_NOM_USER";
     public static final String EXTRA_DATE = "EXTRA_DATE";
     public static final String EXTRA_PRIX = "EXTRA_PRIX";
     public static final String BUNDLE_EXTRAS = "BUNDLE_EXTRAS";
     public static final String EXTRA_ID_ACHAT = "EXTRA_ID_ACHAT";
+    public static final String EXTRA_LIBELLE_NEW_ARTICLE = "EXTRA_LIBELLE_NEW_ARTICLE";
+    public static final String EXTRA_COMMENTAIRE = "EXTRA_COMMENTAIRE";
+    public static final String EXTRA_QUANTITE = "EXTRA_QUANTITE";
 
 
     public static final String EXTRA_IMAGE_RES_ID = "EXTRA_IMAGE_RES_ID";
     public static final String ADD_TOKEN_TO_DATABASE = "Register/reg";
     public static final String GET_ACHAT = "BrainFuckApp/";
+    public static final String FAB_POSITION_X = "FAB_POSITION_X";
+    public static final String FAB_POSITION_Y = "FAB_POSTION_Y";
+    public static final String LIST_ACHAT = "LIST_ACHAT";
+
+    static final int ADD_NEW_ACHAT_REQUEST = 1;  // The request code
 
 
     private RecyclerView recyclerView;
@@ -72,10 +67,19 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
     private HttpGetTask hgt;
     private ContentValues cv;
     private FloatingActionButton fab;
+    private RelativeLayout yourParentView;
 
     private ArrayList<Achat> listData;
 
     private ProgressDialog pd;
+
+    private static AnimationSet getAnimation(int x, int y) {
+
+        AnimationSet animSet = new AnimationSet(false);
+        animSet.addAnimation(new TranslateAnimation(0, 0, x, y));
+        animSet.setDuration(1100);
+        return animSet;
+    }
 
     @Override
     protected void onResume() {
@@ -95,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
         String test = FirebaseInstanceId.getInstance().getToken();
         registerToken(test);
 
+        noAchat = (TextView)findViewById(R.id.no_achat);
+
         listData = new ArrayList();
         pd = new ProgressDialog(this);
         pd.setTitle("Downloading...");
@@ -110,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
                 noAchat.setVisibility(View.GONE);
 
             } catch (Exception e) {
-
+                Toast.makeText(this, "Exception :" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         } else {
 
@@ -128,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
 
             AlertDialog alert11 = builder1.create();
             alert11.show();
-            noAchat = (TextView) findViewById(R.id.textView4);
+            noAchat = (TextView) findViewById(R.id.no_achat);
 
             if (listData.isEmpty()) {
                 noAchat.setVisibility(View.VISIBLE);
@@ -143,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
         fab = (FloatingActionButton) findViewById(R.id.fab);
         Animation hyperspaceJump = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
         fab.startAnimation(hyperspaceJump);
+
+        yourParentView = (RelativeLayout) findViewById(R.id.root_layout_mainActivity);
 
 
     }
@@ -161,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
         startActivity(i);
 
     }
-
 
     @Override
     public void onSecondaryIconClick(int p) {
@@ -203,43 +210,66 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
     }
 
     private void deleteItem(final int position) {
-        listData.remove(position);
-        adapter.notifyItemRemoved(position);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmation de supression")
+                .setMessage("Voulez vous vraiment supprimer cette achat ?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ContentValues cv = new ContentValues();
+                                cv.put("id_achat", listData.get(position).getId_achat());
+                                CoordinatorLayout coord = (CoordinatorLayout) findViewById(R.id.coord_layout);
+                                HttpPostTask hp = new HttpPostTask(MainActivity.this, "BrainFuckApp/deleteAchat", cv);
+                                hp.execute();
+                                listData.remove(position);
+                                adapter.notifyItemRemoved(position);
+                                Snackbar sb = Snackbar.make(coord, "Achat supprimé !", Snackbar.LENGTH_SHORT);
+                                View snackBarView = sb.getView();
+                                snackBarView.setBackgroundColor(getColor(R.color.colorAccent));
+                                sb.show();
+
+                            }
+                        }
+                )
+                .setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+
+
     }
 
     public void onFabClick(View v) {
-        if (isNetworkAvailable()) {
-            try {
-                cv = new ContentValues();
-
-                hgt = new HttpGetTask(this, "BrainFuckApp/achat", ScriptValues.GET_ALL_ACHAT, pd);
-                hgt.execute();
-                noAchat.setVisibility(View.GONE);
 
 
-            } catch (Exception e) {
+        SimpleDateFormat sp = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+        Date today = new Date();
+        String date = sp.format(today);
 
-            }
-        } else {
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-            builder1.setMessage("Internet indisponible");
-            builder1.setCancelable(false);
+        String commentaire = "";
 
-            builder1.setPositiveButton(
-                    "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+        ContentValues cv = new ContentValues();
+        cv.put("id_user", 1);
+        cv.put("date", date);
+        cv.put("commentaire", commentaire);
+        HttpPostTask hp = new HttpPostTask(this, "BrainFuckApp/addAchat", cv);
+        hp.execute();
 
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
-            noAchat = (TextView) findViewById(R.id.textView4);
-            if (listData.isEmpty()) {
-                noAchat.setVisibility(View.VISIBLE);
-            }
-        }
+
+        /*Bundle extras = new Bundle();
+        extras.putFloat(FAB_POSITION_X, fab.getX());
+        extras.putFloat(FAB_POSITION_Y, fab.getY());
+        extras.putParcelableArrayList(LIST_ACHAT, listData);
+        Intent intent = new Intent(MainActivity.this, AddNewAchatActivity.class);
+        intent.putExtra(BUNDLE_EXTRAS, extras);
+        startActivityForResult(intent, ADD_NEW_ACHAT_REQUEST);  */
+
+
     }
 
 
@@ -249,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
     }
 
 
-    public  boolean isNetworkAvailable() {
+    public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
@@ -270,22 +300,24 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
         Log.i("TEST LOG", "test");
         switch (scriptConstant) {
             case (ScriptValues.GET_ALL_ACHAT): {
-                if (jsondata != null){
+                if (jsondata != null) {
                     int id_achat;
                     String user;
                     String date;
+                    String commentaire;
                     JSONArray array = null;
                     listData.clear();
-                    try{
+                    try {
                         array = new JSONArray(jsondata);
-                        for (int i = 0; i< array.length(); i++){
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject row = array.getJSONObject(i);
                             id_achat = row.getInt("id");
                             user = row.getString("nom") + " " + row.getString("prenom");
                             date = row.getString("date");
-                            listData.add(new Achat(id_achat,user,date));
+                            commentaire = row.getString("commentaire");
+                            listData.add(new Achat(id_achat, user, date, commentaire));
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                     }
                     adapter = new AchatAdapter(listData, this);
@@ -336,5 +368,73 @@ public class MainActivity extends AppCompatActivity implements AchatAdapter.Item
                 break;
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode) {
+            case RESULT_OK: {
+                if (data != null) {
+                    Bundle extras = data.getBundleExtra(BUNDLE_EXTRAS);
+
+                    ContentValues cv = new ContentValues();
+                    cv.put("id_user", extras.getInt(EXTRA_NOM_USER));
+                    cv.put("date", extras.getString(EXTRA_DATE));
+                    cv.put("libelle", extras.getString(EXTRA_LIBELLE_NEW_ARTICLE));
+                    cv.put("prix", extras.getInt(EXTRA_PRIX));
+                    cv.put("quantite", extras.getInt(EXTRA_QUANTITE));
+                    cv.put("commentaire", extras.getString(EXTRA_COMMENTAIRE));
+                    HttpPostTask hp = new HttpPostTask(this, "BrainFuckApp/addArticle", cv);
+                    hp.execute();
+                }
+
+
+            }
+            break;
+        }
+
+
+    }
+
+    @Override
+    public void onPostRequestFinished(String jsondata) {
+        JSONArray array = null;
+        JSONObject jsonObject = null;
+        try {
+            JSONObject row = new JSONObject(jsondata);
+            Achat achat = new Achat(row.getInt("id"), row.getString("nom") + " " + row.getString("prenom"), row.getString("date"), row.getString("commentaire"));
+            this.listData.add(0, achat);
+            adapter.notifyItemInserted(0);
+            CoordinatorLayout coord = (CoordinatorLayout) findViewById(R.id.coord_layout);
+            Snackbar sb = Snackbar.make(coord, "Nouvel achat créé", Snackbar.LENGTH_INDEFINITE);
+            View v = sb.getView();
+            v.setBackgroundColor(getColor(R.color.colorAccent));
+
+            sb.setAction("Voir", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scrollMyListViewToBottom();
+                }
+            });
+            sb.setActionTextColor(getColor(R.color.colorPrimaryDark));
+            sb.show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //this.listData.add(new Article(id_articles, id_user, nom_user, prenom_user, libelle_article, date, prix, quantite));
+
+
+    }
+
+    private void scrollMyListViewToBottom() {
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                // Select the last row so it will scroll into view...
+                recyclerView.scrollToPosition(0);
+            }
+        });
     }
 }

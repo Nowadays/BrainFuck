@@ -13,7 +13,7 @@ import okhttp3.RequestBody;
 /**
  * Created by Deode on 14/09/2016.
  */
-public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService implements RemoteDatabaseListener {
+public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService implements RemoteDatabaseListener, PostResultListener {
 
 
     @Override
@@ -40,5 +40,10 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService imple
 
         HttpPostTask httpPostTask = new HttpPostTask(this,token,null);
         httpPostTask.execute(token);
+    }
+
+    @Override
+    public void onPostRequestFinished(String jsondata) {
+
     }
 }
